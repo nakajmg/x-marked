@@ -2,10 +2,11 @@
 <template id="x-marked">
   <link rel="stylesheet" href="github-markdown.css">
   <style>
+    :unresolved { display: none; }
     [data-x-marked-originalText] { display: none; }
   </style>
   <section class="x-marked">
-    <div data-x-marked-content class="markdown-body"></div>
+    <div data-x-marked-content></div>
     <div data-x-marked-originalText>
       <content></content>
     </div>
@@ -16,6 +17,7 @@
 (function() {
   var currentScript = document._currentScript || document.currentScript;
   var doc = currentScript.ownerDocument;
+  
   var proto = Object.create(HTMLElement.prototype, {
     createdCallback: {
       value: function() {
@@ -24,43 +26,34 @@
         var tmpl = doc.querySelector('#x-marked');
         var clone = document.importNode(tmpl.content, true);
         this.createShadowRoot().appendChild(clone);
-        
-        var style = document.createElement('style');
-        var csshref= this.shadowRoot.querySelector('link[rel=stylesheet]').getAttribute('href');
-        var xhr = new XMLHttpRequest();
-        var isApplyStyle = this.getAttribute('data-apply-style');
-        
-        if(isApplyStyle === "true") {
-          xhr.open('GET', csshref, true);
-          xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4 && xhr.status === 200){
-              style.textContent = xhr.responseText;
-              _this.shadowRoot.appendChild(style);
-            }
-            if (xhr.readyState === 4 && xhr.status === 0){
-              style.textContent = xhr.responseText;
-              _this.shadowRoot.appendChild(style);
-            }
-          }
-          xhr.send();  
-        }
-        
+        this.applyStyle();
       }
     },
-    
+    applyStyle: {
+      value: function() {
+        var _this = this, style, cssHref, xhr;
+        var isApplyStyle = this.hasAttribute('data-apply-style');
+        
+        if(isApplyStyle) {
+          cssHref = this.shadowRoot.querySelector('link[rel=stylesheet]').getAttribute('href');
+          xhr = new XMLHttpRequest();
+          xhr.open('GET', cssHref, true);
+          xhr.onload = function() {
+            if (xhr.status === 200){
+              style = document.createElement('style');
+              style.textContent = xhr.responseText;
+              _this.shadowRoot.appendChild(style);
+              _this.shadowRoot.querySelector('[data-x-marked-content]').classList.add('markdown-body');
+            }
+          }
+          xhr.send();
+        }
+      }
+    },
     attachedCallback: {
       value: function() {
         var originalText = this.innerHTML;
         var markedContent = this.shadowRoot.querySelector('[data-x-marked-content]');
-        marked.setOptions({
-            gfm: true,
-            tables: true,
-            breaks: false,
-            pedantic: false,
-            sanitize: true,
-            smartLists: true,
-            smartypants: false
-        })
         markedContent.innerHTML = marked(originalText)
       }
     }
