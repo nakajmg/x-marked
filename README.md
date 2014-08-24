@@ -1,8 +1,8 @@
-x-marked
+# x-marked
 
 x-marked is Web Components module. render markdown to HTML.
 
-========
+---
 
 マークダウンで書かれたテキストをHTMLに変換するウェッブコンポーネンツッ
 
