@@ -23,7 +23,7 @@ x-marked is Web Components module. render markdown to HTML.
 <x-marked>#markdownテキストをいれるとレンダリングされるよ</x-marked>
 ```
 
-タグに`data-apply-style="true"`をつけるとGitHub風なレンダリングになるよ。
+タグに`data-apply-style`をつけるとGitHub風なレンダリングになるよ。
 
 ## 使ったもの
 
