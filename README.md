@@ -4,6 +4,8 @@ x-marked is Web Components module. render markdown to HTML.
 
 ---
 
+[demo](http://nakajmg.github.io/x-marked/)
+
 マークダウンで書かれたテキストをHTMLに変換するウェッブコンポーネンツッ
 
 * リストだって
