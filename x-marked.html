@@ -26,28 +26,7 @@
         var tmpl = doc.querySelector('#x-marked');
         var clone = document.importNode(tmpl.content, true);
         this.createShadowRoot().appendChild(clone);
-        this.applyStyle();
-      }
-    },
-    applyStyle: {
-      value: function() {
-        var _this = this, style, cssHref, xhr;
-        var isApplyStyle = this.hasAttribute('data-apply-style');
-        
-        if(isApplyStyle) {
-          cssHref = this.shadowRoot.querySelector('link[rel=stylesheet]').getAttribute('href');
-          xhr = new XMLHttpRequest();
-          xhr.open('GET', cssHref, true);
-          xhr.onload = function() {
-            if (xhr.status === 200){
-              style = document.createElement('style');
-              style.textContent = xhr.responseText;
-              _this.shadowRoot.appendChild(style);
-              _this.shadowRoot.querySelector('[data-x-marked-content]').classList.add('markdown-body');
-            }
-          }
-          xhr.send();
-        }
+        this._applyStyleSheet();
       }
     },
     attachedCallback: {
@@ -55,6 +34,44 @@
         var originalText = this.innerHTML;
         var markedContent = this.shadowRoot.querySelector('[data-x-marked-content]');
         markedContent.innerHTML = marked(originalText)
+      }
+    },
+    _applyStyleSheet: {
+      value: function() {
+        var isApplyStyle = this.hasAttribute('data-apply-style');
+        if(isApplyStyle) {
+          this._loadStyleSheet();
+        }
+      }
+    },
+    _loadStyleSheet: {
+      value: function() {
+        var _this = this;
+        var styleSheets = this.shadowRoot.querySelectorAll('link[rel=stylesheet]');
+        
+        [].forEach.call(styleSheets, function(styleSheet) {
+          var href = styleSheet.getAttribute('href');
+          if(href) { _load(href); }
+        });
+        
+        function _load(href) {
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', href, true);
+          xhr.onload = function() {
+            if (xhr.status === 200){
+              _insert(xhr.responseText);
+              if(href === "github-markdown.css") {
+                _this.shadowRoot.querySelector('[data-x-marked-content]').classList.add('markdown-body');  
+              }
+            }
+          };
+          xhr.send();
+        }
+        function _insert(styleSheetText) {
+          var style = document.createElement('style');
+          style.textContent = styleSheetText;
+          _this.shadowRoot.appendChild(style);
+        }
       }
     }
   });
